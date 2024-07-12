@@ -7,12 +7,14 @@ WORKDIR /iycms
 # 安装必要的工具
 RUN apk add --no-cache wget unzip
 
-# 下载并解压相应架构的CMS包
-ARG ARCH=amd64
-RUN if [ "$ARCH" = "amd64" ]; then \
+# 检测架构并下载相应架构的CMS包
+RUN arch=$(uname -m) && \
+    if [ "$arch" = "x86_64" ]; then \
         wget https://iycms.com/api/static/version/main/linux/cms-linux_x86-64-v3.3.44.zip -O cms.zip; \
-    else \
+    elif [ "$arch" = "aarch64" ]; then \
         wget https://iycms.com/api/static/version/main/linux/cms-linux_arm64-v3.3.44.zip -O cms.zip; \
+    else \
+        echo "Unsupported architecture: $arch" && exit 1; \
     fi && \
     unzip cms.zip && \
     rm cms.zip
